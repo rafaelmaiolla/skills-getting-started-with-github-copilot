@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? details.participants.map((p) =>
                     `<li class="participant-item">
                       <span>${p}</span>
-                      <button class="remove-btn" data-email="${p}" data-activity="${name}" title="Unregister participant">
+                      <button class="remove-btn" data-email="${p}" data-activity="${name}" title="Unregister participant" aria-label="Unregister participant ${p}">
                         &#x1F5D1;
                       </button>
                     </li>`
