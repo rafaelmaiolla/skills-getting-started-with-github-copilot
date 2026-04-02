@@ -19,13 +19,49 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
-
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <p class="participants-title">Current Participants</p>
+            <ul class="participants-list" data-activity="${name}">
+              ${details.participants.length
+                ? details.participants.map((p) =>
+                    `<li class="participant-item">
+                      <span>${p}</span>
+                      <button class="remove-btn" data-email="${p}" data-activity="${name}" title="Unregister participant" aria-label="Unregister participant ${p}">
+                        &#x1F5D1;
+                      </button>
+                    </li>`
+                  ).join("")
+                : '<li class="empty-participants">No students signed up yet</li>'
+              }
+            </ul>
+          </div>
         `;
+
+        activityCard.querySelectorAll(".remove-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const email = btn.dataset.email;
+            const activity = btn.dataset.activity;
+            try {
+              const res = await fetch(
+                `/activities/${encodeURIComponent(activity)}/unregister?email=${encodeURIComponent(email)}`,
+                { method: "DELETE" }
+              );
+              if (res.ok) {
+                fetchActivities();
+              } else {
+                const err = await res.json();
+                alert(err.detail || "Failed to unregister participant.");
+              }
+            } catch {
+              alert("Failed to unregister participant.");
+            }
+          });
+        });
 
         activitiesList.appendChild(activityCard);
 
@@ -62,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
